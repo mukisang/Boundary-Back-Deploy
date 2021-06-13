@@ -24,7 +24,8 @@ n install stable//node가 최신버전
 sudo apt-get install -y mongodb-org
 </pre>
 
-<h1> [MongoDB 설치](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu, "google link")</h1>
+<h1> MongoDB 설치</h1>
+[도움 될 만한 사이트](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu, "google link")</h1>
 
 <h1> git clone </h1>
 <pre>

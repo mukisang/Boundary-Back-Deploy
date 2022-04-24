@@ -1,4 +1,3 @@
-//load the dependencies
 const express = require('express');
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
@@ -29,8 +28,7 @@ db.once('open', ()=>{
 })
 
 
-//parse JSON and url-encoded query
-app.use(bodyParser.urlencoded({extended: false}))
+//POST body 파싱로직(중첩 객체 표현 허용 옵션)
 app.use(bodyParser.json())
 
 //print the request log on console

@@ -25,23 +25,20 @@ const storage = multer.diskStorage({
 })
 const upload = multer({storage: storage})
 
-//for download
-
 
 router.post('/signUp', controller.signUp)
 router.post('/signIn', controller.signIn)
 
+
 router.use('/user', authMiddleware)
 router.get('/user', controller.view)
-
-router.use('/user/:email', authMiddleware)
 router.get('/user/:email', controller.view)
+router.put('/user',controller.editNickname)
+
 
 router.use('/profile', authMiddleware)
 router.put('/profile',upload.single('file'),controller.editProfile)
 
-router.use('/user', authMiddleware)
-router.put('/user',controller.editNickname)
 
 router.use('/chatroom', authMiddleware)
 router.post('/chatroom', controller.createChatRoom)

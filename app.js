@@ -23,9 +23,11 @@ app.listen(PORT, () => {
 mongoose.connect(config.mongodbUri)
 const db = mongoose.connection
 db.on('error', console.error)
+//db 연결 시작시 호출 함수
 db.once('open', ()=>{
     console.log('connected to mongodb')
 })
+
 
 //parse JSON and url-encoded query
 app.use(bodyParser.urlencoded({extended: false}))

@@ -389,7 +389,6 @@ exports.searchChatRoom = (request, response) => {
 exports.deleteChatRoom = (request, response) => {
     const {email} = request.query
     const check = (room) => {
-        console.log(room)
         if (!room){
             //room does not exist
             throw new Error('Has No Room')

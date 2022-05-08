@@ -4,23 +4,38 @@ const Room = require('../../models/room')
 const fs = require('fs')
 //server IP
 const config = require('../../config')
-const serverIP = config.serverName
+const staticPath = config.staticPath
+
+
+const onError = (status, response, error) => {
+    response.status(status).json({
+        message: error.message
+    })
+}
+
+const successRespond = (user, response) =>{
+    response.json({
+        header : {
+            message : "success"
+        },
+        body : {
+            email : user.email,
+            nickname : user.nickname,
+            profileImage : staticPath + user.profileImage
+        },
+    })
+}
 
 exports.signUp = (request, response) => {
     const { nickname, email, password } = request.body
 
     //create user if not exist
-    const create = (user) => {
-        if(user) {
-            if(user.nickname == nickname)
-                throw new Error('nickname exists')
-            else if(user.email == email)
-                throw new Error('email exists')
-        } else {
-            console.log("user creating...")
-            return User.create(nickname, email, password, "NULL")
-        }
+    const create = () => {
+        console.log("user creating...")
+        return User.create(nickname, email, password, "NULL")
+        
     }
+
     const respond = () =>{
         response.json({
             header : {
@@ -29,21 +44,25 @@ exports.signUp = (request, response) => {
             body : {
                 email : email,
                 nickname : nickname,
-                profileImage : "NULL"
+                profileImage : "null"
             }
         })
     }
-    const onError = (error) => {
-        response.status(409).json({
-            message: error.message
-        })
-    }
+    
 
-    //check nickname duplication
-    User.findOneByNicknameEmail(nickname, email)
-        .then(create)
-        .then(respond)
-        .catch(onError)
+    (async () => {
+        try{
+            await create()
+            respond()
+        } catch(error){
+            if(error.code == 11000){
+                error.message = "nickname/email already exists"
+                onError(409, response, error)
+            }
+            else
+                onError(500, response, error)
+        }
+    })()
 
 }
 
@@ -52,29 +71,27 @@ exports.signIn = (request, response) =>{
     const secret = request.app.get('jwt-secret')
 
     //check the user info & generate the jwt
-    const check = (user) => {
+    const checkAndGenerateToken = (user) => {
         if (!user) {
             //user does not exist
             throw new Error('login failed')
         } else {
             if (user.verify(password)) {
-                const p = new Promise((resolve, reject) => {
+                return new Promise((resolve, reject) => {
                     jwt.sign(
                         {
-                            _id: user._id,
                             email : user.email
                         },
                         secret,
                         {
-                            expiresIn: '7d',
+                            expiresIn: '1h',
                             issuer: 'boundary.com',
                             subject: 'userInfo'
                         }, (err, token) => {
                             if (err) reject(err)
-                            resolve([token, user])
+                            resolve(token)
                         })
                 })
-                return p
             } else {
                 throw new Error('login failed')
             }
@@ -91,141 +108,87 @@ exports.signIn = (request, response) =>{
             body : {
                 email : email,
                 nickname : user.nickname,
-                profileImage : serverIP + user.profileImage
+                profileImage : staticPath + user.profileImage
             },
             token : token,
         })
     }
 
-    //error occured
-    const onError = (error) => {
-        response.status(403).json({
-            message: error.message
-        })
-    }
 
-    //find the user
-    User.findOneByEmail(email)
-        .then(check)
-        .then(([token, user]) => respond(token, user))
-        .catch(onError)
+    (async () => {
+        try{
+            let user = await User.findOneByEmail(email)
+            //암호화 로직 비동기처리
+            let token = await checkAndGenerateToken(user)
+            respond(token, user)
+        } catch(error){
+            onError(403, response, error)
+        }
+    })()
+
 }
 
-exports.check = (request, response) => {
-    response.json({
-        success: true,
-        info : request.decoded
-    })
-}
 
 exports.view = (request, response) => {
-    const userE = request.params.email ? request.params.email : request.decoded['email']
-    const check = (user) => {
-        if (!user) {
-            //user does not exist
-            throw new Error('No matching email')
+    const userEmail = request.params.email ? request.params.email : request.decoded['email']
+
+    (async () => {
+        try{
+            let user = await User.findOneByEmail(userEmail)
+            if(user)
+                successRespond(user, response)
+            else{
+                error = new Error()
+                error.message = "no matching user"
+                onError(406, response, error)
+            }
+        } catch(error){
+            onError(500, response, error)
         }
-        return user
-    }
-
-    const respond = (user) =>{
-        //console.log(userE)
-        response.json({
-            header : {
-                message : "success"
-            },
-            body : {
-                email : user.email,
-                nickname : user.nickname,
-                profileImage : serverIP + user.profileImage
-            },
-        })
-    }
-
-    const onError = (error) => {
-        response.status(403).json({
-            message: error.message
-        })
-    }
-
-    User.findOneByEmail(userE)
-        .then(check)
-        .then(respond)
-        .catch(onError)
-
+    })()
 
 }
 
 exports.editProfile = (request, response) => {
-    const check = (user) => {
+    const checkFile = (user) => {
         return new Promise(function (resolve){
             if (!request.file) {
                 //user does not exist
                 throw new Error('No file')
             }
-            if (user.profileImage)
+            if (user.profileImage != "NULL")
             {
-                fs.unlink(__dirname + "/../../profiles/" + user.profileImage, (err) =>{
-                    if(err){
+                fs.unlink(__dirname + "/../../profiles/" + user.profileImage, (error) =>{
+                    if(error){
                         console.log("no existing profile match with fs")
-                        //throw new Error('while deleting profiles error')
                     }
                 })
             }
-            resolve([user, request.file.filename])
+            resolve(user)
         })
     }
 
-    const respond = (user) =>{
-        response.json({
-            header : {
-                message : "success"
-            },
-            body : {
-                email : user.email,
-                nickname : user.nickname,
-                profileImage : serverIP + user.profileImage
-            },
-        })
-    }
+    
 
-    const onError = (error) => {
-        response.status(403).json({
-            message: error.message
-        })
-    }
-    User.findOneByEmail(request.decoded["email"])
-        .then(check)
-        .then(([user, profileImage]) => User.findOneAndReplaceImage(user, profileImage))
-        .then(respond)
-        .catch(onError)
+
+    (async () => {
+        try{
+            let user = await User.findOneByEmail(request.decoded["email"])
+            await checkFile(user)
+            await User.findOneAndReplaceImage(user, request.file.filename)
+            successRespond(user, response)
+        } catch(error){
+            console.log(error)
+            onError(500, response, error)
+        }
+    })()
+
 
 }
 
 exports.editNickname = (request, response) => {
     const {nickname} = request.body
-    const check = (user) => {
-        return new Promise(function (resolve, reject){
-            if (!user) {
-                //user does not exist
-                throw new Error('No user')
-            }
-            resolve([user, nickname])
-        })
-    }
 
-    const respond = (user) =>{
-        response.json({
-            header : {
-                message : "success"
-            },
-            body : {
-                email : user.email,
-                nickname : user.nickname,
-                profileImage : serverIP + user.profileImage
-            },
-        })
-    }
 
     const onError = (error) => {
         response.status(403).json({
@@ -233,11 +196,23 @@ exports.editNickname = (request, response) => {
         })
     }
 
-    User.findOneByEmail(request.decoded["email"])
-        .then(check)
-        .then(([user, nickname]) => User.findOneAndReplaceNickname(user, nickname))
-        .then(respond)
-        .catch(onError)
+    (async () => {
+        try{
+            let user = await User.findOneByEmail(request.decoded["email"])
+            await User.findOneAndReplaceNickname(user, nickname)
+            successRespond(user, response)
+        } catch(error){
+            console.log(error)
+            onError(500, response, error)
+        }
+    })()
+
+
+    // User.findOneByEmail(request.decoded["email"])
+    //     .then(check)
+    //     .then(([user, nickname]) => User.findOneAndReplaceNickname(user, nickname))
+    //     .then(respond)
+    //     .catch(onError)
 
 }
 
@@ -358,7 +333,7 @@ exports.searchChatRoom = (request, response) => {
                 generator : {
                     email : room.generator.email,
                     nickname : room.generator.nickname,
-                    profileImage : serverIP + room.generator.profileImage
+                    profileImage : staticPath + room.generator.profileImage
                 }
             })
         })

@@ -27,7 +27,7 @@ const authMiddleware = (request, response, next) => {
                 message : error.message
             })
         else
-            response.status(401).json({
+            response.status(500).json({
                 success : false,
                 message : error.message
             })
@@ -53,6 +53,7 @@ const authMiddleware = (request, response, next) => {
             onError(err)
         }
     })()
+
 }
 
 module.exports = authMiddleware

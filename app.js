@@ -42,5 +42,5 @@ app.use('/api', require('./routes/api'))
 
 
 //정적 파일(프로필 정보) 로드
-app.use(express.static(path.join((__dirname, 'profiles'))))
+app.use('/static/', express.static(path.join((__dirname, 'profiles'))))
 

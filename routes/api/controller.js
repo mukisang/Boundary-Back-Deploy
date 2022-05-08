@@ -168,6 +168,7 @@ exports.editProfile = (request, response) => {
             {
                 fs.unlink(__dirname + "/../../profiles/" + user.profileImage, (error) =>{
                     if(error){
+                        console.log(error)
                         console.log("no existing profile match with fs")
                     }
                 })
@@ -176,14 +177,12 @@ exports.editProfile = (request, response) => {
         })
     }
 
-    
-
 
     (async () => {
         try{
             let user = await User.findOneByEmail(request.decoded["email"])
             await checkFile(user)
-            await User.findOneAndReplaceImage(user, request.file.filename)
+            user = await User.findOneAndReplaceImage(user, request.file.filename)
             successRespondUser(user, response)
         } catch(error){
             console.log(error)
@@ -266,7 +265,6 @@ exports.checkChatRoom = (request, response) => {
             }
             simpleSuccessRespond(response)
         } catch(error){
-            console.log(error)
             onError(400, response, error)
         }
     })()
@@ -307,7 +305,6 @@ exports.searchChatRoom = (request, response) => {
             let rooms = await Room.searching(latitude, longitude)
             respond(rooms)
         } catch(error){
-            console.log(error)
             onError(400, response, error)
         }
     })()
@@ -316,7 +313,6 @@ exports.searchChatRoom = (request, response) => {
 
 //Delete Chat Room
 exports.deleteChatRoom = (request, response) => {
-
     (async () => {
         try{
             const {email} = request.query
@@ -327,7 +323,6 @@ exports.deleteChatRoom = (request, response) => {
             await Room.delete(room)
             simpleSuccessRespond(response)
         } catch(error){
-            console.log(error)
             onError(400, response, error)
         }
     })()

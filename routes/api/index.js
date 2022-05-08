@@ -1,29 +1,8 @@
 const router = require('express').Router()
 const controller = require('./controller')
 const authMiddleware = require('../../middlewares/auth')
-const multer = require('multer')
+const upload = require('./storage').upload
 
-//for multer
-const storage = multer.diskStorage({
-    destination(request, file, cb) {
-        cb(null, 'profiles/')
-    },
-    filename: (req, file, cb) => {
-        var filetype = '';
-        if (file.mimetype === 'image/gif') {
-            filetype = 'gif';
-        }
-        if (file.mimetype === 'image/png') {
-            filetype = 'png';
-        }
-        if (file.mimetype === 'image/jpeg') {
-            filetype = 'jpg';
-        }
-        cb(null, 'image-' + Date.now() + '.' + filetype);
-    }
-
-})
-const upload = multer({storage: storage})
 
 
 router.post('/signUp', controller.signUp)
@@ -37,7 +16,7 @@ router.put('/user',controller.editNickname)
 
 
 router.use('/profile', authMiddleware)
-router.put('/profile',upload.single('file'),controller.editProfile)
+router.put('/profile',upload.single('file'), controller.editProfile)
 
 
 router.use('/chatroom', authMiddleware)

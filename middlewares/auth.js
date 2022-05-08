@@ -2,25 +2,17 @@ const jwt = require('jsonwebtoken')
 
 const authMiddleware = (request, response, next) => {
 
-    if(!(request.headers.cookie))
-    {
-        return response.status(401).json({
-            success : false,
-            message : 'token does not exist'
-        })
-    }
-    //read token from Auth
-    const token = request.headers.cookie.split('=')[1]
-
     //create a promise that decodes the token
-    const p = new Promise(
-        (resolve, reject)=>{
-            jwt.verify(token, request.app.get('jwt-secret'), (err, decoded) => {
-                if(err) reject(err)
-                resolve(decoded)
-            })
-        }
-    )
+    const verifyToken = (token)=>{ 
+        return new Promise(
+            (resolve, reject)=>{
+                jwt.verify(token, request.app.get('jwt-secret'), (err, decoded) => {
+                    if(err) reject(err)
+                    resolve(decoded)
+                })
+            }
+        )
+    }
 
     //if failed to verify, return error message
     const onError = (error) => {
@@ -35,19 +27,33 @@ const authMiddleware = (request, response, next) => {
                 message : error.message
             })
         else
-            response.status(401).json({
+            response.status(500).json({
                 success : false,
                 message : error.message
             })
 
-
     }
 
-    //preocess the promise
-    p.then((decoded) => {
-        request.decoded = decoded
-        next()
-    }).catch(onError)
+    //do process
+    (async function process() {
+        try{
+            //check cookie
+            if(!(request.headers.cookie))
+            {
+                return response.status(401).json({
+                    success : false,
+                    message : 'token does not exist'
+                })
+            }
+            const token = request.headers.cookie.split('=')[1]
+            decoded = await verifyToken(token)
+            request.decoded = decoded
+            next()
+        } catch(err){
+            onError(err)
+        }
+    })()
+
 }
 
 module.exports = authMiddleware

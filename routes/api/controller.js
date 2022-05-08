@@ -7,13 +7,21 @@ const config = require('../../config')
 const staticPath = config.staticPath
 
 
+const simpleSuccessRespond = (response) =>{
+    response.json({
+        header : {
+            message : "success"
+        },
+    })
+}
+
 const onError = (status, response, error) => {
     response.status(status).json({
         message: error.message
     })
 }
 
-const successRespond = (user, response) =>{
+const successRespondUser = (user, response) =>{
     response.json({
         header : {
             message : "success"
@@ -136,7 +144,7 @@ exports.view = (request, response) => {
         try{
             let user = await User.findOneByEmail(userEmail)
             if(user)
-                successRespond(user, response)
+                successRespondUser(user, response)
             else{
                 error = new Error()
                 error.message = "no matching user"
@@ -176,7 +184,7 @@ exports.editProfile = (request, response) => {
             let user = await User.findOneByEmail(request.decoded["email"])
             await checkFile(user)
             await User.findOneAndReplaceImage(user, request.file.filename)
-            successRespond(user, response)
+            successRespondUser(user, response)
         } catch(error){
             console.log(error)
             onError(500, response, error)
@@ -190,53 +198,24 @@ exports.editNickname = (request, response) => {
     const {nickname} = request.body
 
 
-    const onError = (error) => {
-        response.status(403).json({
-            message: error.message
-        })
-    }
-
     (async () => {
         try{
             let user = await User.findOneByEmail(request.decoded["email"])
             await User.findOneAndReplaceNickname(user, nickname)
-            successRespond(user, response)
+            successRespondUser(user, response)
         } catch(error){
             console.log(error)
             onError(500, response, error)
         }
     })()
 
-
-    // User.findOneByEmail(request.decoded["email"])
-    //     .then(check)
-    //     .then(([user, nickname]) => User.findOneAndReplaceNickname(user, nickname))
-    //     .then(respond)
-    //     .catch(onError)
-
 }
 
 //Create Chat Room
 exports.createChatRoom = (request, response) => {
-    const { title, latitude,  longitude} = request.body
-    const user = User.findOneByEmail(request.decoded["email"])
-
-    //create user if not exist
-    const create = (user) => {
-        return Room.create(title, latitude, longitude, user)
-    }
-
-    const checkRoom = (room) => {
-        return new Promise(function (resolve, reject){
-            if (room) {
-                //user does not exist
-                throw new Error('generator already has room ')
-            }
-            resolve(user)
-        })
-    }
-
-    const respond = (room) =>{
+    const { title, latitude, longitude} = request.body
+   
+    const respond = (room, user) =>{
         response.json({
             header : {
                 message : "success"
@@ -249,77 +228,52 @@ exports.createChatRoom = (request, response) => {
                     longitude : parseFloat(room.location.coordinates[0])
                 },
                 generator : {
-                    email : room.generator.email,
-                    nickname : room.generator.nickname,
-                    profileImage : room.generator.profileImage
+                    email : user.email,
+                    nickname : user.nickname,
+                    profileImage : staticPath + user.profileImage
                 }
             },
         })
     }
 
-    const onError = (error) => {
-        response.status(403).json({
-            message: error.message
-        })
-    }
-
-    Room.findOneByEmail(request.decoded["email"])
-        .then(checkRoom)
-        .then((email) => create(email))
-        .then((room) => respond(room))
-        .catch(onError)
-}
-
-//Check Chat Room
-exports.checkChatRoom = (request, response) => {
-    const {email} = request.query
-    const check = (room) => {
-        if (!room){
-            //room does not exist
-            throw new Error('Has No Room')
+    (async () => {
+        try{
+            const email = request.decoded["email"]
+            const user = await User.findOneByEmail(email)
+            let room = await Room.findOneByEmail(email)
+            if (room) {
+                throw new Error("generator already has room")
+            }
+            room = await Room.create(title, latitude, longitude, user)
+            respond(room, user)
+        } catch(error){
+            console.log(error)
+            onError(400, response, error)
         }
-        return new Promise(function (resolve, reject){
-            resolve(room)
-        })
-    }
-    const respond = () =>{
-        response.json({
-            header : {
-                message : "success"
-            },
-        })
-    }
-    const onError = (error) => {
-        response.status(403).json({
-            message: error.message
-        })
-    }
+    })()
 
-
-    Room.findOneByEmail(email)
-        .then(check)
-        .then(respond)
-        .catch(onError)
 }
 
+//Check user has Chat Room
+exports.checkChatRoom = (request, response) => {
+
+    (async () => {
+        try{
+            const {email} = request.query
+            let room = await Room.findOneByEmail(email)
+            if (!room) {
+                throw new Error("Has No Room")
+            }
+            simpleSuccessRespond(response)
+        } catch(error){
+            console.log(error)
+            onError(400, response, error)
+        }
+    })()
+}
 
 //Search Chat Room
 exports.searchChatRoom = (request, response) => {
-    const {latitude, longitude} = request.query
-    const check = (rooms) => {
-        if (!rooms){
-            //room does not exist
-            throw new Error('Has No Matching Room')
-        }
-        return new Promise(function (resolve, reject){
-            resolve(rooms)
-        })
-    }
-
-    const search = (latitude, longitude) => {
-        return Room.searching(latitude, longitude)
-    }
-
     const respond = (rooms) =>{
         let body = []
         rooms.forEach(function (room){
@@ -337,7 +291,6 @@ exports.searchChatRoom = (request, response) => {
                 }
             })
         })
-        //console.log(data)
 
         response.json({
             header : {
@@ -347,53 +300,36 @@ exports.searchChatRoom = (request, response) => {
         })
     }
 
-    const onError = (error) => {
-        response.status(403).json({
-            message: error.message
-        })
-    }
 
+    (async () => {
+        try{
+            const {latitude, longitude} = request.query
+            let rooms = await Room.searching(latitude, longitude)
+            respond(rooms)
+        } catch(error){
+            console.log(error)
+            onError(400, response, error)
+        }
+    })()
 
-    search(latitude, longitude)
-        .then(check)
-        .then((rooms) => respond(rooms))
-        .catch(onError)
 }
 
 //Delete Chat Room
 exports.deleteChatRoom = (request, response) => {
-    const {email} = request.query
-    const check = (room) => {
-        if (!room){
-            //room does not exist
-            throw new Error('Has No Room')
+
+    (async () => {
+        try{
+            const {email} = request.query
+            let room = await Room.findOneByEmail(email)
+            if (!room){
+                throw new Error('Has No Room')
+            }
+            await Room.delete(room)
+            simpleSuccessRespond(response)
+        } catch(error){
+            console.log(error)
+            onError(400, response, error)
         }
-        return new Promise(function (resolve, reject){
-            resolve(room)
-        })
-    }
-    const respond = () =>{
-        response.json({
-            header : {
-                message : "success"
-            },
-        })
-    }
-
-    const deleting = (room) => {
-        Room.delete(room)
-    }
-
-    const onError = (error) => {
-        response.status(403).json({
-            message: error.message
-        })
-    }
-
-    Room.findOneByEmail(email)
-        .then(check)
-        .then(deleting)
-        .then(respond)
-        .catch(onError)
+    })()
 
 }

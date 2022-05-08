@@ -32,7 +32,8 @@ Room.statics.create = function (title, latitude, longitude, generator){
         generator : generator,
     })
     room.save()
-    return room.populate('generator', 'email nickname profileImage').execPopulate()
+    // room.populate('generator', 'email nickname profileImage').execPopulate()
+    return room
 }
 
 Room.statics.searching = function (latitude, longitude){
@@ -59,7 +60,8 @@ Room.statics.findOneByEmail = function (email){
 }
 
 Room.statics.delete = function (room){
-    return this.deleteOne({id : room.id}).exec()
+    // return this.deleteOne({id : room.id}).exec()
+    this.deleteOne({id : room.id}).exec()
 }
 
 module.exports = mongoose.model('Room', Room)

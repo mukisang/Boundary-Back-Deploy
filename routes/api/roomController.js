@@ -8,6 +8,8 @@ const staticPath = config.staticPath
 const onError = controller.onError
 const simpleSuccessRespond = controller.simpleSuccessRespond
 
+const PAGECNT = 5
+
 
 //Create Chat Room
 exports.createChatRoom = (request, response) => {
@@ -100,8 +102,12 @@ exports.searchChatRoom = (request, response) => {
 
     (async () => {
         try{
-            const {latitude, longitude} = request.query
-            let rooms = await Room.searching(latitude, longitude)
+            const {latitude, longitude, page} = request.query
+            skip = 0
+            if (page){
+                skip = page * PAGECNT
+            }
+            let rooms = await Room.searching(latitude, longitude, skip, PAGECNT)
             respond(rooms)
         } catch(error){
             onError(400, response, error)

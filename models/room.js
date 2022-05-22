@@ -36,20 +36,20 @@ Room.statics.create = function (title, latitude, longitude, generator){
     return room
 }
 
-Room.statics.searching = function (latitude, longitude){
+Room.statics.searching = function (latitude, longitude, skip, PAGECNT){
     const coordinates = [longitude, latitude]
     return this.find({
         location : {
             $near : {
                 //1km : 1000
-                $maxDistance : 1000,
+                $maxDistance : 1000000,
                 $geometry : {
                     type : "Point",
                     coordinates : coordinates
                 }
             }
         }
-    },{_id : false}).populate('generator', 'email nickname profileImage',{_id : false})
+    },{_id : false}).skip(skip).limit(PAGECNT).populate('generator', 'email nickname profileImage',{_id : false})
 }
 
 

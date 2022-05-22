@@ -4,6 +4,7 @@ const Room = require('../../models/room')
 const fs = require('fs')
 //server IP
 const config = require('../../config')
+const res = require('express/lib/response')
 const staticPath = config.staticPath
 
 
@@ -136,12 +137,24 @@ exports.signIn = (request, response) =>{
 
 }
 
-
-exports.view = (request, response) => {
-    const userEmail = request.params.email ? request.params.email : request.decoded['email']
+exports.signOut = (request, response) =>{
 
     (async () => {
         try{
+            response.cookie("token", "")
+            simpleSuccessRespond(response)
+        } catch(error){
+            onError(403, response, error)
+        }
+    })()
+
+}
+
+exports.view = (request, response) => {
+
+    (async () => {
+        try{
+            const userEmail = request.params.email ? request.params.email : request.decoded['email']
             let user = await User.findOneByEmail(userEmail)
             if(user)
                 successRespondUser(user, response)
@@ -189,7 +202,6 @@ exports.editProfile = (request, response) => {
             onError(500, response, error)
         }
     })()
-
 
 }
 

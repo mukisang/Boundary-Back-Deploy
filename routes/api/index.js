@@ -13,7 +13,7 @@ router.use('/user', authMiddleware)
 router.get('/user', controller.view)
 router.get('/user/:email', controller.view)
 router.put('/user',controller.editNickname)
-
+router.post('/user/signOut',controller.signOut)
 
 router.use('/profile', authMiddleware)
 router.put('/profile',upload.single('file'), controller.editProfile)

@@ -127,7 +127,7 @@ const view = (request, response) => {
     (async () => {
         try{
             const userEmail = request.params.email ? request.params.email : request.decoded['email']
-            let user = await User.findOneByEmail(userEmail)
+            let user: any = await User.findOneByEmail(userEmail) 
             if(user)
                 successRespondUser(user, response)
             else{
@@ -167,8 +167,8 @@ const editProfile = (request, response) => {
         try{
             let user = await User.findOneByEmail(request.decoded["email"])
             await checkFile(user)
-            user = await User.findOneAndReplaceImage(user, request.file.filename)
-            successRespondUser(user, response)
+            let endUser = await User.findOneAndReplaceImage(user, request.file.filename)
+            successRespondUser(endUser, response)
         } catch(error){
             console.log(error)
             onError(500, response, error)

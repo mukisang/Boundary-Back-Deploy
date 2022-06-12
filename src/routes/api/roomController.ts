@@ -42,8 +42,8 @@ const createChatRoom = (request, response) => {
             if (room) {
                 throw new Error("generator already has room")
             }
-            room = await Room.create(title, latitude, longitude, user)
-            respond(room, user)
+            let newRoom = await Room.create(title, latitude, longitude, user)
+            respond(newRoom, user)
         } catch(error){
             onError(400, response, error)
         }

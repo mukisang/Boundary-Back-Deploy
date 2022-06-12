@@ -5,18 +5,9 @@ import morgan from 'morgan'
 import router from "./routes/api/index.js"
 // const router = require('./routes/api/index.js')
 import {setting} from './config.js'
-
-
-
-
-// const express = require('express');
-// const bodyParser = require('body-parser')
-// const morgan = require('morgan')
-// const mongoose = require('mongoose')
-// const path = require('path')
-
-//load the config
-// const config = require('./config')
+import session from 'express-session'
+import sessionFileStore from 'session-file-store'
+// const fileStore = require('session-file-store')(session);
 const PORT = process.env.PORT || setting.serverPort;
 
 
@@ -47,6 +38,27 @@ app.use(morgan('dev'))
 
 //set the secret key variable for jwt
 app.set('jwt-secret', setting.secret)
+
+
+
+//set the session
+const option = {
+    path: './session',
+    reapInterval: 60 * 60 * 24, //쿠키 만료 시 자동으로 삭제하는 기능
+}
+
+let fileStore = sessionFileStore(session)
+
+app.use(session({
+    secret: setting.secret,
+    resave: false,//기존 세션과 변경사항 없어도 저장 여부
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 1000 * 60,//1시간
+    },
+    store: new fileStore(option)
+}))
+
 
 //configure api router
 app.use('/api', router)

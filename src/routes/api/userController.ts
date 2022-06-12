@@ -65,7 +65,7 @@ const signIn = (request, response) =>{
                         },
                         secret,
                         {
-                            expiresIn: '1h',
+                            expiresIn: '1d',
                             issuer: 'boundary.com',
                             subject: 'userInfo'
                         }, (err, token) => {
@@ -81,7 +81,7 @@ const signIn = (request, response) =>{
 
 
     const respond = (token, user) =>{
-        response.cookie('token', token)
+        request.session.key = token
         response.json({
             header : {
                 message : "success"
@@ -91,7 +91,6 @@ const signIn = (request, response) =>{
                 nickname : user.nickname,
                 profileImage : staticPath + user.profileImage
             },
-            token : token,
         })
     }
 
@@ -113,7 +112,8 @@ const signOut = (request, response) =>{
 
     (async () => {
         try{
-            response.cookie("token", "")
+            request.session.destroy()
+            response.clearCookie('connect.sid')
             simpleSuccessRespond(response)
         } catch(error){
             onError(403, response, error)

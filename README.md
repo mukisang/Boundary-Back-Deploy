@@ -8,3 +8,10 @@
     - 지도 기반 UI + SPA로 Front 구성
     - NoSQL + Geo Special Query + Restful
     - 웹앱으로 제작하여 안드로이드 스토어에 출시
+
+- Refactoring
+    - 코드 리펙토링
+    - 로그아웃 로직 추가
+    - promise.then -> async await
+    - Pagenation 추가
+    - type script 변환

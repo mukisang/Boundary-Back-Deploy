@@ -1,8 +1,9 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
+import crypto from 'crypto'
+import {setting} from '../config.js'
+import User from './user.js'
 const Schema = mongoose.Schema
-const crypto = require('crypto')
-const User = require('./user')
-const config = require('../config')
+
 
 
 //made Room
@@ -21,7 +22,7 @@ Room.index({ location: "2dsphere"})
 //create new user
 Room.statics.create = function (title, latitude, longitude, generator){
     //room id will encrypted by user.email
-    const encrypted = encodeURIComponent(crypto.createHmac('sha1', config.secret).update(generator.email).digest('base64'))
+    const encrypted = encodeURIComponent(crypto.createHmac('sha1', setting.secret).update(generator.email).digest('base64'))
     const room = new this({
         id : encrypted,
         title : title,
@@ -55,7 +56,7 @@ Room.statics.searching = function (latitude, longitude, skip, PAGECNT){
 
 //find one by nickname or email
 Room.statics.findOneByEmail = function (email){
-    const encrypted = encodeURIComponent(crypto.createHmac('sha1', config.secret).update(email).digest('base64'))
+    const encrypted = encodeURIComponent(crypto.createHmac('sha1', setting.secret).update(email).digest('base64'))
     return this.findOne({id : encrypted}).exec()
 }
 
@@ -64,4 +65,5 @@ Room.statics.delete = function (room){
     this.deleteOne({id : room.id}).exec()
 }
 
-module.exports = mongoose.model('Room', Room)
+// module.exports = mongoose.model('Room', Room)
+export default mongoose.model('Room', Room)

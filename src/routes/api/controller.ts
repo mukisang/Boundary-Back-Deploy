@@ -1,8 +1,8 @@
 //server IP
-const config = require('../../config')
-const staticPath = config.staticPath
+import {setting} from '../../config.js'
+const staticPath = setting.staticPath
 
-exports.simpleSuccessRespond = (response) =>{
+const simpleSuccessRespond = (response) =>{
     response.json({
         header : {
             message : "success"
@@ -10,13 +10,13 @@ exports.simpleSuccessRespond = (response) =>{
     })
 }
 
-exports.onError = (status, response, error) => {
+const onError = (status, response, error) => {
     response.status(status).json({
         message: error.message
     })
 }
 
-exports.successRespondUser = (user, response) =>{
+const successRespondUser = (user, response) =>{
     response.json({
         header : {
             message : "success"
@@ -28,3 +28,5 @@ exports.successRespondUser = (user, response) =>{
         },
     })
 }
+
+export {simpleSuccessRespond, onError, successRespondUser};

@@ -1,16 +1,13 @@
-const fs = require('fs')
-const User = require('../../models/user')
+import * as fs from 'fs'
+import User from '../../models/user.js'
 //server IP
-const config = require('../../config')
-const staticPath = config.staticPath
-const jwt = require('jsonwebtoken')
+import {setting} from '../../config.js'
+import {simpleSuccessRespond, onError, successRespondUser} from './controller.js'
+import jwt from 'jsonwebtoken'
+const staticPath = setting.staticPath
 
-const controller = require('./controller')
-const onError = controller.onError
-const simpleSuccessRespond = controller.simpleSuccessRespond
-const successRespondUser = controller.successRespondUser
 
-exports.signUp = (request, response) => {
+const signUp = (request, response) => {
     const { nickname, email, password } = request.body
 
     //create user if not exist
@@ -50,7 +47,7 @@ exports.signUp = (request, response) => {
 
 }
 
-exports.signIn = (request, response) =>{
+const signIn = (request, response) =>{
     const {email, password} = request.body
     const secret = request.app.get('jwt-secret')
 
@@ -112,7 +109,7 @@ exports.signIn = (request, response) =>{
 
 }
 
-exports.signOut = (request, response) =>{
+const signOut = (request, response) =>{
 
     (async () => {
         try{
@@ -125,7 +122,7 @@ exports.signOut = (request, response) =>{
 
 }
 
-exports.view = (request, response) => {
+const view = (request, response) => {
 
     (async () => {
         try{
@@ -134,7 +131,7 @@ exports.view = (request, response) => {
             if(user)
                 successRespondUser(user, response)
             else{
-                error = new Error()
+                let error = new Error()
                 error.message = "no matching user"
                 onError(406, response, error)
             }
@@ -145,7 +142,7 @@ exports.view = (request, response) => {
 
 }
 
-exports.editProfile = (request, response) => {
+const editProfile = (request, response) => {
     const checkFile = (user) => {
         return new Promise(function (resolve){
             if (!request.file) {
@@ -154,7 +151,7 @@ exports.editProfile = (request, response) => {
             }
             if (user.profileImage != "NULL")
             {
-                fs.unlink(__dirname + "/../../profiles/" + user.profileImage, (error) =>{
+                fs.unlink(staticPath + user.profileImage, (error) =>{
                     if(error){
                         console.log(error)
                         console.log("no existing profile match with fs")
@@ -179,12 +176,12 @@ exports.editProfile = (request, response) => {
     })()
 }
 
-exports.editNickname = (request, response) => {
-    const {nickname} = request.body
+const editNickname = (request, response) => {
 
 
     (async () => {
         try{
+            const {nickname} = request.body
             let user = await User.findOneByEmail(request.decoded["email"])
             await User.findOneAndReplaceNickname(user, nickname)
             successRespondUser(user, response)
@@ -195,3 +192,5 @@ exports.editNickname = (request, response) => {
     })()
 
 }
+
+export {signUp, signIn, view, editNickname, signOut, editProfile};

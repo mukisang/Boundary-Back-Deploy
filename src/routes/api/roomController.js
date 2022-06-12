@@ -1,18 +1,16 @@
-const User = require('../../models/user')
-const Room = require('../../models/room')
-const controller = require('./controller')
-//server IP
-const config = require('../../config')
-const staticPath = config.staticPath
+import User from '../../models/user.js'
+import Room from '../../models/room.js'
+import {simpleSuccessRespond, onError} from './controller.js'
+import {setting} from '../../config.js'
 
-const onError = controller.onError
-const simpleSuccessRespond = controller.simpleSuccessRespond
+//server IP
+const staticPath = setting.staticPath
 
 const PAGECNT = 5
 
 
 //Create Chat Room
-exports.createChatRoom = (request, response) => {
+const createChatRoom = (request, response) => {
     const { title, latitude, longitude} = request.body
    
     const respond = (room, user) =>{
@@ -47,7 +45,6 @@ exports.createChatRoom = (request, response) => {
             room = await Room.create(title, latitude, longitude, user)
             respond(room, user)
         } catch(error){
-            console.log(error)
             onError(400, response, error)
         }
     })()
@@ -55,7 +52,7 @@ exports.createChatRoom = (request, response) => {
 }
 
 //Check user has Chat Room
-exports.checkChatRoom = (request, response) => {
+const checkChatRoom = (request, response) => {
 
     (async () => {
         try{
@@ -72,7 +69,7 @@ exports.checkChatRoom = (request, response) => {
 }
 
 //Search Chat Room
-exports.searchChatRoom = (request, response) => {
+const searchChatRoom = (request, response) => {
     const respond = (rooms) =>{
         let body = []
         rooms.forEach(function (room){
@@ -103,9 +100,12 @@ exports.searchChatRoom = (request, response) => {
     (async () => {
         try{
             const {latitude, longitude, page} = request.query
-            skip = 0
+            let skip = 0
             if (page){
                 skip = page * PAGECNT
+            }
+            else{
+                skip = 0
             }
             let rooms = await Room.searching(latitude, longitude, skip, PAGECNT)
             respond(rooms)
@@ -117,7 +117,7 @@ exports.searchChatRoom = (request, response) => {
 }
 
 //Delete Chat Room
-exports.deleteChatRoom = (request, response) => {
+const deleteChatRoom = (request, response) => {
     (async () => {
         try{
             const {email} = request.query
@@ -133,3 +133,5 @@ exports.deleteChatRoom = (request, response) => {
     })()
 
 }
+
+export {createChatRoom, searchChatRoom, checkChatRoom, deleteChatRoom}

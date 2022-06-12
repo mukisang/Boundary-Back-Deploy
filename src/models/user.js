@@ -1,7 +1,8 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
+import crypto from 'crypto'
+import {setting} from '../config.js'
 const Schema = mongoose.Schema
-const crypto = require('crypto')
-const config = require('../config')
+
 
 //made new user
 const User = new Schema({
@@ -13,7 +14,7 @@ const User = new Schema({
 
 //create new user
 User.statics.create = function (nickname, email, password, profileImage){
-    const encrypted = crypto.createHmac('sha1', config.secret).update(password).digest('base64')
+    const encrypted = crypto.createHmac('sha1', setting.secret).update(password).digest('base64')
     const user = new this({
         nickname,
         email,
@@ -24,7 +25,7 @@ User.statics.create = function (nickname, email, password, profileImage){
 }
 
 User.methods.verify = function(password) {
-    const encrypted = crypto.createHmac('sha1', config.secret).update(password).digest('base64')
+    const encrypted = crypto.createHmac('sha1', setting.secret).update(password).digest('base64')
     return this.password === encrypted
 }
 
@@ -64,4 +65,6 @@ User.statics.findOneAndReplaceNickname = function(user, nickname){
     return user
 }
 
-module.exports = mongoose.model('User', User)
+
+// module.exports = mongoose.model('User', User)
+export default mongoose.model('User', User)

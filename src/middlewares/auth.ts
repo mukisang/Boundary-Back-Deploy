@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken')
+import jwt from 'jsonwebtoken'
+
 
 const authMiddleware = (request, response, next) => {
-
     //create a promise that decodes the token
     const verifyToken = (token)=>{ 
         return new Promise(
@@ -46,7 +46,7 @@ const authMiddleware = (request, response, next) => {
                 })
             }
             const token = request.headers.cookie.split('=')[1]
-            decoded = await verifyToken(token)
+            let decoded = await verifyToken(token)
             request.decoded = decoded
             next()
         } catch(err){
@@ -56,4 +56,4 @@ const authMiddleware = (request, response, next) => {
 
 }
 
-module.exports = authMiddleware
+export {authMiddleware};

@@ -45,6 +45,8 @@ build/Release
 # Dependency directories
 node_modules/
 jspm_packages/
+session/
+/static/profiles/
 
 # TypeScript v1 declaration files
 typings/
@@ -129,3 +131,16 @@ tmp/
 temp/
 
 
+# Editors
+.idea
+*.iml
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Ignore built ts files
+dist/**/*
+
+# ignore yarn.lock
+yarn.lock

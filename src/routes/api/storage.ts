@@ -1,10 +1,11 @@
-const multer = require('multer')
-
-const upload = multer({
-    dest : 'profiles/',
+import multer  from 'multer';
+import { setting } from '../../config.js';
+const filePath = setting.filePath
+const uploadOption = multer({
+    dest : filePath,
     storage : multer.diskStorage({
     destination : (req, file, cb) => {
-        cb(null, 'profiles/')
+        cb(null, filePath)
     },
     filename: (req, file, cb) => {
         var filetype = '';
@@ -22,4 +23,4 @@ const upload = multer({
     })
 })
 
-exports.upload = upload
+export {uploadOption}

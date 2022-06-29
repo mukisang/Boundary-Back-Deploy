@@ -16,7 +16,7 @@
     - Pagenation 추가
     - type script 변환
     - 세션을 통한 인증 로직 변경
-[]<사진 넣기>
+
 ## How to use
     1. Get into Boundary
     2. SignUp + SignIn

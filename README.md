@@ -20,6 +20,8 @@
     - type script 변환
     - 세션을 통한 인증 로직 변경
 
+---
+
 ## How to use
 <img width="574" alt="boundary" src="https://user-images.githubusercontent.com/33710013/176423670-ecc22259-d4eb-439b-b280-12968a593096.PNG">
     1. Get into Boundary

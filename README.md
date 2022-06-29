@@ -1,6 +1,7 @@
 # Boundary_backend
 <p align="center">
-<img src="https://user-images.githubusercontent.com/30883319/121801534-c77b0b80-cc72-11eb-8d72-193a9e24ee33.png">
+    <img src="https://user-images.githubusercontent.com/30883319/121801534-c77b0b80-cc72-11eb-8d72-193a9e24ee33.png">
+    <img width="574" alt="boundary" src="https://user-images.githubusercontent.com/33710013/176423670-ecc22259-d4eb-439b-b280-12968a593096.PNG">
 </p>
 
 - 거리기반 음성 채팅 웹앱(Nodejs + JIRA)(`2021.02 ~ 2021.06`)
@@ -9,9 +10,6 @@
     - NoSQL + Geo Special Query + Restful
     - 웹앱으로 제작하여 안드로이드 스토어에 출시
 
-<p align="left">
-    <img width="574" alt="boundary" src="https://user-images.githubusercontent.com/33710013/176423670-ecc22259-d4eb-439b-b280-12968a593096.PNG">
-</p>
 
 ---
 

@@ -16,3 +16,13 @@
     - Pagenation 추가
     - type script 변환
     - 세션을 통한 인증 로직 변경
+[]<사진 넣기>
+## How to use
+    1. Get into Boundary
+    2. SignUp + SignIn
+    3. Choose which room want to get in
+    4. Free for chat!
+
+
+## Boundary_frontend
+- https://github.com/cau-boundary/Boundary-Front-Deploy

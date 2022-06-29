@@ -9,7 +9,7 @@
     - NoSQL + Geo Special Query + Restful
     - 웹앱으로 제작하여 안드로이드 스토어에 출시
 
-<p align="center">
+<p align="left">
     <img width="574" alt="boundary" src="https://user-images.githubusercontent.com/33710013/176423670-ecc22259-d4eb-439b-b280-12968a593096.PNG">
 </p>
 

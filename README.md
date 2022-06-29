@@ -13,6 +13,8 @@
     <img width="574" alt="boundary" src="https://user-images.githubusercontent.com/33710013/176423670-ecc22259-d4eb-439b-b280-12968a593096.PNG">
 </p>
 
+---
+
 - Refactoring & Development
     - 코드 리펙토링
     - 로그아웃 로직 추가
